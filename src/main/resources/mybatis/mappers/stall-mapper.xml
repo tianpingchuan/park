@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.park.stall.dao.StallDao">
+
+	<sql id="stall_base_select">
+		SELECT ROW_ID,STALL_CODE,STALL_STATE,ACTIVE_FLAG,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE FROM TB_STALL WHERE ACTIVE_FLAG = 1
+	</sql>
+
+	<insert id="save" parameterType="Stall" useGeneratedKeys="true" keyColumn="ROW_ID" keyProperty="rowId">
+		INSERT INTO TB_STALL (STALL_CODE,STALL_STATE,ACTIVE_FLAG,CREATE_BY,CREATE_DATE)
+		VALUES(#{stallCode},#{stallState},#{activeFlag},#{createBy},#{createDate})
+	</insert>
+
+	<select id="findByPage" resultType="Stall">
+		<include refid="stall_base_select" />
+		<include refid="search_sql"></include>
+		LIMIT #{firstResult},#{maxResults}
+	</select>
+	<select id="findByPages" resultType="Stall">
+		<include refid="stall_base_select" />
+		<include refid="search_fragement"></include>
+		LIMIT #{pagination.firstResult},#{pagination.maxResults}
+	</select>
+
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(ROW_ID) FROM TB_STALL WHERE ACTIVE_FLAG =1
+		<include refid="search_sql"></include>
+	</select>
+
+	<!-- 拼接多条件查询的SQL语句 -->
+	<sql id="search_fragement">
+		<if test="searchParam!=null">
+			<if test="searchParam.stallCode!=null">
+				AND STALL_CODE = #{searchParam.stallCode}
+			</if>
+			<if test="searchParam.stallState!=null">
+				AND STALL_STATE = #{searchParam.stallState}
+			</if>
+		</if>
+	</sql>
+
+	<sql id="search_sql">
+		<if test="searchStall!=null">
+			<if test="searchStall.stallCode!=null">
+				AND STALL_CODE = #{searchStall.stallCode}
+			</if>
+			<if test="searchStall.stallState!=null">
+				AND STALL_STATE = #{searchStall.stallState}
+			</if>
+		</if>
+	</sql>
+
+	<select id="get" resultType="Stall">
+		<include refid="stall_base_select" />
+		AND ROW_ID = #{rowId}
+	</select>
+	
+	<update id="updateByCode" parameterType="Stall">
+		UPDATE TB_STALL
+		<set>
+			<if test="stallState!=null">
+				STALL_STATE = #{stallState},
+			</if>
+		</set>
+		WHERE STALL_CODE = #{stallCode}
+	</update>
+
+	<update id="update" parameterType="Stall">
+		UPDATE TB_STALL
+		<set>
+			<if test="stallCode!=null">
+				STALL_CODE = #{stallCode},
+			</if>
+			<if test="stallState!=null">
+				STALL_STATE = #{stallState},
+			</if>
+			<if test="updateBy!=null">
+				UPDATE_BY = #{updateBy},
+			</if>
+			<if test="updateDate!=null">
+				UPDATE_DATE = #{updateDate},
+			</if>
+		</set>
+		WHERE ROW_ID = #{rowId}
+	</update>
+
+	<!-- 逻辑删除 -->
+	<update id="delete" parameterType="Stall">
+		UPDATE TB_STALL SET ACTIVE_FLAG=0 WHERE ROW_ID = #{rowId}
+	</update>
+
+	<select id="findAll" resultType="Stall">
+		<include refid="stall_base_select" />
+	</select>
+
+	<select id="getByCode" resultType="Stall">
+		<include refid="stall_base_select" />
+		AND STALL_CODE = #{stallCode}
+	</select>
+</mapper>

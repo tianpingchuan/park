@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.park.user.dao.UserDao">
+
+	<!-- 买家用户搜索 -->
+	<sql id="user_base_select_buyer">
+		SELECT ROW_ID,USER_TYPE,USER_NAME,USER_CODE,USER_PASS,USER_PHONE,IF_LOCK,END_IP,END_LOGINDATE,ACTIVE_FLAG,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE FROM TB_USER WHERE ACTIVE_FLAG = 1 AND USER_TYPE = 2
+	</sql>
+	
+	<!-- 管理员用户查询 -->
+	<sql id="user_base_select_admin">
+		SELECT ROW_ID,USER_TYPE,USER_NAME,USER_CODE,USER_PASS,USER_PHONE,IF_LOCK,END_IP,END_LOGINDATE,ACTIVE_FLAG,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE FROM TB_USER WHERE ACTIVE_FLAG = 1 AND USER_TYPE = 1
+	</sql>
+	
+	<sql id="user_base_select_all">
+		SELECT ROW_ID,USER_TYPE,USER_NAME,USER_CODE,USER_PASS,USER_PHONE,IF_LOCK,END_IP,END_LOGINDATE,ACTIVE_FLAG,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE FROM TB_USER WHERE ACTIVE_FLAG = 1
+	</sql>
+	
+	<insert id="save" parameterType="User" useGeneratedKeys="true" keyColumn="ROW_ID" keyProperty="rowId">
+		INSERT INTO TB_USER (USER_TYPE,USER_NAME,USER_CODE,USER_PASS,USER_PHONE,IF_LOCK,ACTIVE_FLAG,CREATE_BY,CREATE_DATE)
+		VALUES(#{userType},#{userName},#{userCode},#{userPass},#{userPhone},#{ifLock},#{activeFlag},#{createBy},#{createDate})
+	</insert>
+	
+	<select id="login" resultType="User"  parameterType="User">
+		<include refid="user_base_select_all"/>
+		AND USER_TYPE = #{userType} AND USER_CODE=#{userCode} AND USER_PASS=#{userPass} AND IF_LOCK=1
+	</select>
+	
+	<select id="findByPage" resultType="User">
+		<include refid="user_base_select_buyer"/>
+		<include refid="search_sql"></include>
+		 LIMIT #{firstResult},#{maxResults}
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(ROW_ID) FROM TB_USER WHERE ACTIVE_FLAG =1 AND USER_TYPE = 2
+		<include refid="search_sql"></include>
+	</select>
+	<sql id="search_sql">
+		<if test="searchUser!=null">
+			<if test="searchUser.userName!=null">
+			AND USER_NAME = #{searchUser.userName}
+			</if>
+			<if test="searchUser.userCode!=null">
+			AND USER_CODE = #{searchUser.userCode}
+			</if>
+		</if>
+	</sql>
+	
+	<select id="get" resultType="User">
+		<include refid="user_base_select_buyer"/> AND ROW_ID = #{rowId}
+	</select>
+	
+	<update id="update" parameterType="User">
+		UPDATE TB_USER
+		<set>
+			<if test="userName!=null">
+				USER_NAME = #{userName},
+			</if>
+			<if test="userCode!=null">
+				USER_CODE = #{userCode},
+			</if>
+			<if test="userPass!=null">
+				USER_PASS = #{userPass},
+			</if>
+			<if test="userPhone!=null">
+				USER_PHONE = #{userPhone},
+			</if>
+			<if test="updateBy!=null">
+				UPDATE_BY = #{updateBy},
+			</if>
+			<if test="updateDate!=null">
+				UPDATE_DATE = #{updateDate},
+			</if>
+		</set>
+		WHERE ROW_ID = #{rowId}
+	</update>
+	
+	<!-- 逻辑删除 -->
+	<update id="delete" parameterType="User" >
+		UPDATE TB_USER SET ACTIVE_FLAG=0 WHERE ROW_ID = #{rowId}
+	</update>
+	
+	<update id="doUpdateLogin" parameterType="User">
+		UPDATE TB_USER SET END_IP=#{endIp}, END_LOGINDATE = #{endLoginDate} WHERE ROW_ID = #{rowId}
+	</update>
+	
+	<update id="doLock" parameterType="User" >
+		UPDATE TB_USER SET IF_LOCK=0 WHERE ROW_ID = #{rowId}
+	</update>
+	<update id="doNoLock" parameterType="User" >
+		UPDATE TB_USER SET IF_LOCK=1 WHERE ROW_ID = #{rowId}
+	</update>
+	
+	<select id="findUserByCodeAndId" resultType="User" parameterType="User">
+		<include refid="user_base_select_all"/> AND ROW_ID = #{rowId} AND USER_CODE = #{userCode} AND IF_LOCK=1
+	</select>
+	
+	<select id="getByName" resultType="User" parameterType="User">
+		<include refid="user_base_select_all"/> AND USER_NAME = #{userName}
+	</select>
+	
+	<select id="getByCode" resultType="User" parameterType="User">
+		<include refid="user_base_select_all"/> AND USER_CODE = #{userCode}
+	</select>
+	
+	<select id="findAll" resultType="User">
+		<include refid="user_base_select_buyer"/>
+	</select>
+</mapper>

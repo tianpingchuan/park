@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.park.record.dao.RecordDao">
+	<sql id="record_base_column">
+		USER_ID,CAR_ID,STALL_CODE,CAR_NUM,PARK_TIME,TAKE_TIME,SHOULD_PAY,IF_PAY,ACTIVE_FLAG,CREATE_BY,CREATE_DATE
+	</sql>
+	<sql id="record_base_select">
+		SELECT ROW_ID,
+		<include refid="record_base_column" />
+		, UPDATE_BY,UPDATE_DATE FROM TB_RECORD WHERE ACTIVE_FLAG = 1
+	</sql>
+	<!-- Column 语句 -->
+	<sql id="column_fragement">
+		<if test="userId != null">
+			USER_ID,
+		</if>
+		<if test="carId != null">
+			CAR_ID,
+		</if>
+		<if test="stallCode != null">
+			STALL_CODE,
+		</if>
+		<if test="carNum != null">
+			CAR_NUM,
+		</if>
+		<if test="parkTime != null">
+			PARK_TIME,
+		</if>
+		<if test="takeTime != null">
+			TAKE_TIME,
+		</if>
+		<if test="shouldPay != null">
+			SHOULD_PAY,
+		</if>
+		<if test="ifPay != null">
+			IF_PAY,
+		</if>
+		<if test="activeFlag != null">
+			ACTIVE_FLAG,
+		</if>
+		<if test="createBy != null">
+			CREATE_BY,
+		</if>
+		<if test="createDate != null">
+			CREATE_DATE,
+		</if>
+		<if test="updateBy != null">
+			UPDATE_BY,
+		</if>
+		<if test="updateDate != null">
+			UPDATE_DATE,
+		</if>
+	</sql>
+	<!-- Values 语句 -->
+	<sql id="values_fragement">
+		<if test="userId != null">
+			#{userId},
+		</if>
+		<if test="carId != null">
+			#{carId},
+		</if>
+		<if test="stallCode != null">
+			#{stallCode},
+		</if>
+		<if test="carNum != null">
+			#{carNum},
+		</if>
+		<if test="parkTime != null">
+			#{parkTime},
+		</if>
+		<if test="takeTime != null">
+			#{takeTime},
+		</if>
+		<if test="shouldPay != null">
+			#{shouldPay},
+		</if>
+		<if test="ifPay != null">
+			#{ifPay},
+		</if>
+		<if test="activeFlag != null">
+			#{activeFlag},
+		</if>
+		<if test="createBy != null">
+			#{createBy},
+		</if>
+		<if test="createDate != null">
+			#{createDate},
+		</if>
+		<if test="updateBy != null">
+			#{updateBy},
+		</if>
+		<if test="updateDate != null">
+			#{updateDate},
+		</if>
+	</sql>
+	<insert id="save" parameterType="Record" useGeneratedKeys="true" keyProperty="rowId" keyColumn="ROW_ID">
+		INSERT INTO TB_RECORD
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="column_fragement" />
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<include refid="values_fragement" />
+		</trim>
+	</insert>
+	<update id="update" parameterType="Record">
+		UPDATE TB_RECORD
+		<set>
+			<if test="userId != null">
+				USER_ID = #{userId},
+			</if>
+			<if test="carId != null">
+				CAR_ID = #{carId},
+			</if>
+			<if test="stallCode != null">
+				STALL_CODE = #{stallCode},
+			</if>
+			<if test="carNum != null">
+				CAR_NUM = #{carNum},
+			</if>
+			<if test="parkTime != null">
+				PARK_TIME = #{parkTime},
+			</if>
+			<if test="takeTime != null">
+				TAKE_TIME = #{takeTime},
+			</if>
+			<if test="shouldPay != null">
+				SHOULD_PAY = #{shouldPay},
+			</if>
+			<if test="ifPay != null">
+				IF_PAY = #{ifPay},
+			</if>
+			<if test="activeFlag != null">
+				ACTIVE_FLAG = #{activeFlag},
+			</if>
+			<if test="createBy != null">
+				CREATE_BY = #{createBy},
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE = #{createDate},
+			</if>
+			<if test="updateBy != null">
+				UPDATE_BY = #{updateBy},
+			</if>
+			<if test="updateDate != null">
+				UPDATE_DATE = #{updateDate},
+			</if>
+		</set>
+		WHERE ROW_ID = #{rowId}
+	</update>
+	<delete id="delete">
+		DELETE FROM TB_RECORD WHERE ROW_ID = #{rowId}
+	</delete>
+	<select id="get" resultType="Record">
+		<include refid="record_base_select" />
+		AND ROW_ID = #{rowId}
+	</select>
+	<select id="find" resultType="Record">
+		<include refid="record_base_select" />
+	</select>
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(ROW_ID) FROM TB_RECORD WHERE ACTIVE_FLAG = 1
+		<!-- 引入多条件查询的语句 -->
+		<include refid="search_fragement" />
+	</select>
+	<select id="findByPage" resultType="Record">
+		<include refid="record_base_select" />
+		<!-- 引入多条件查询的语句 -->
+		<include refid="search_fragement" />
+		<!-- 执行分页的语句 -->
+		LIMIT #{pagination.firstResult},#{pagination.maxResults}
+	</select>
+	<!-- 拼接多条件查询的SQL语句 -->
+	<sql id="search_fragement">
+		<if test="searchParam!=null">
+			<if test="searchParam.userId != null">
+				AND USER_ID = #{searchParam.userId}
+			</if>
+			<if test="searchParam.carId != null">
+				AND CAR_ID = #{searchParam.carId}
+			</if>
+			<if test="searchParam.stallCode != null">
+				AND STALL_CODE = #{searchParam.stallCode}
+			</if>
+			<if test="searchParam.carNum != null">
+				AND CAR_NUM = #{searchParam.carNum}
+			</if>
+			<if test="searchParam.parkTime != null">
+				AND PARK_TIME = #{searchParam.parkTime}
+			</if>
+			<if test="searchParam.takeTime != null">
+				AND TAKE_TIME = #{searchParam.takeTime}
+			</if>
+			<if test="searchParam.shouldPay != null">
+				AND SHOULD_PAY = #{searchParam.shouldPay}
+			</if>
+			<if test="searchParam.ifPay != null">
+				AND IF_PAY = #{searchParam.ifPay}
+			</if>
+			<if test="searchParam.activeFlag!=null">
+				AND ACTIVE_FLAG = #{searchParam.activeFlag}
+			</if>
+		</if>
+	</sql>
+</mapper>
